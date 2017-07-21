@@ -7,7 +7,7 @@
 #include "cwt_node.h"
 
 
-cwt_node::cwt_node() {
+cwt_node::cwt_node(cwt_node *left, cwt_node *right) {
     m_old_a = 0;
     m_new_a = 0;
 
