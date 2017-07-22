@@ -6,7 +6,7 @@
 #include "cwt_node.h"
 
 cwt_node *make_node_recursive(int depth_remaining) {
-    if (depth_remaining == 0)
+    if (depth_remaining < 0)
         return 0;
 
     cwt_node *left = make_node_recursive(depth_remaining-1);
@@ -16,7 +16,7 @@ cwt_node *make_node_recursive(int depth_remaining) {
 }
 
 void kill_tree_recursive(cwt_node *ptr, int depth_remaining) {
-    if (depth_remaining == 0)
+    if (depth_remaining < 0)
         return;
 
     kill_tree_recursive(ptr->m_left, depth_remaining-1);
@@ -39,5 +39,5 @@ double cwt::logprob(uint8 *context, uint8 bit) {
 }
 
 double cwt::update_and_logprob(uint8 *context, uint8 bit) {
-    return m_root_node->update(context, bit, true);
+    return m_root_node->update(context, bit, false);
 }
