@@ -15,6 +15,7 @@ public:
     ~cwt();
     double update_and_logprob(uint8 *context, uint8 bit);
     double logprob(uint8 *context, uint8 bit);
+    double logprob_block();
     cwt_node *m_root_node;
     int m_context_depth;
 };
