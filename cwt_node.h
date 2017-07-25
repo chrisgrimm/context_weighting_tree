@@ -10,7 +10,8 @@ public:
     cwt_node(cwt_node *left, cwt_node *right, int depth, int max_depth);
     ~cwt_node();
     double update_P(bool a_updated);
-    double update(uint8 *context, uint8 bit, bool non_destructive=true);
+    double update(uint8 *context, uint8 bit, cwt_node **updated_nodes);
+    void reset();
     cwt_node* m_left = 0;
     cwt_node* m_right = 0;
     int m_old_a, m_new_a, m_old_b, m_new_b;

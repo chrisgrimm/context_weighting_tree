@@ -25,19 +25,25 @@ cwt::~cwt() {
 };
 
 double cwt::logprob(uint8 *context, uint8 bit) {
-    double before = m_root_node->m_old_weighted_P;
-    double after = m_root_node->update(context, bit, true);
+    double before = logprob_block();
+    cwt_node *updated_nodes[m_context_depth];
+    double after = m_root_node->update(context, bit, updated_nodes);
+
+    for (int i = 0; i < m_context_depth; ++i) {
+        updated_nodes[i]->reset();
+    }
 
     return after - before;
 }
 
 double cwt::update_and_logprob(uint8 *context, uint8 bit) {
-    double before = m_root_node->m_old_weighted_P;
-    double after = m_root_node->update(context, bit, false);
+    double before = logprob_block();
+    cwt_node *updated_nodes[m_context_depth];
+    double after = m_root_node->update(context, bit, updated_nodes);
 
     return after - before;
 }
 
 double cwt::logprob_block() {
-    return m_root_node->m_old_weighted_P;
+    return m_root_node->m_new_weighted_P;
 }

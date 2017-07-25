@@ -31,46 +31,45 @@ cwt_node::cwt_node(cwt_node *left, cwt_node *right, int depth, int max_depth) {
     m_max_depth = max_depth;
 }
 
-double cwt_node::update(uint8 *context, uint8 bit, bool non_destructive) {
+double cwt_node::update(uint8 *context, uint8 bit, cwt_node **updated_nodes) {
 
+    m_old_a = m_new_a;
+    m_old_b = m_new_b;
+    m_old_P = m_new_P;
+    m_old_weighted_P = m_new_weighted_P;
+
+    updated_nodes[m_depth] = this;
     double result;
 
-    if (bit == 1) m_new_b = m_old_b + 1;
-    else m_new_a = m_old_a + 1;
+    if (bit == 1) m_new_b = m_new_b + 1;
+    else m_new_a = m_new_a + 1;
 
     if (m_depth == m_max_depth) {
         result = update_P((bit == 0));
-        if (!non_destructive) {
-            m_old_a = m_new_a;
-            m_old_b = m_new_b;
-            m_old_P = m_new_P;
-            m_old_weighted_P = m_new_weighted_P;
-        }
         return result;
     }
     if (*context == 1) {
         if (m_left == 0) {
             m_left = new cwt_node(0, 0, m_depth+1, m_max_depth);
         }
-        m_left->update(context+1, bit, non_destructive);
+        m_left->update(context+1, bit, updated_nodes);
         result = update_P((bit == 0));
     } else {
         if (m_right == 0) {
             m_right = new cwt_node(0, 0, m_depth+1, m_max_depth);
         }
-        m_right->update(context+1, bit, non_destructive);
+        m_right->update(context+1, bit, updated_nodes);
         result = update_P((bit == 0));
     }
 
-    if (!non_destructive) {
-        //cout << "here!" << "\n";
-        m_old_a = m_new_a;
-        m_old_b = m_new_b;
-        m_old_P = m_new_P;
-        m_old_weighted_P = m_new_weighted_P;
-    }
-
     return result;
+}
+
+void cwt_node::reset() {
+    m_new_a = m_old_a;
+    m_new_b = m_old_b;
+    m_new_P = m_old_P;
+    m_new_weighted_P = m_old_weighted_P;
 }
 
 inline double ctsLogAdd(double log_x, double log_y) {
@@ -98,11 +97,11 @@ cwt_node::~cwt_node() {
 
 double cwt_node::update_P(bool a_updated) {
     if (a_updated) {
-        int a = m_old_a, b = m_old_b;
-        m_new_P = fast_log((a + 0.5) / (a + b + 1)) + m_old_P;
+        int a = m_new_a - 1, b = m_new_b;
+        m_new_P = fast_log((a + 0.5) / (a + b + 1)) + m_new_P;
     } else {
-        int a = m_old_a, b = m_old_b;
-        m_new_P = fast_log((b + 0.5) / (a + b + 1)) + m_old_P;
+        int a = m_new_a, b = m_new_b - 1;
+        m_new_P = fast_log((b + 0.5) / (a + b + 1)) + m_new_P;
     }
     if ((m_left == 0 && m_right == 0)) {
         m_new_weighted_P = m_new_P;

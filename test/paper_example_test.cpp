@@ -10,18 +10,18 @@
 #include <string>
 using namespace std;
 
-//void display_tree_ab(cwt_node *tree, string prefix) {
-//    cout << prefix << tree->m_old_a << " , " << tree->m_old_b << "\n";
-//    cout << prefix << "P_e: " << exp(tree->m_old_P) << "\n";
-//    cout << prefix << "P_w: " << exp(tree->m_new_weighted_P) << "\n";
-//
-//    if (tree->m_left == 0 & tree->m_right == 0) {
-//        return;
-//    } else {
-//        display_tree_ab(tree->m_left, "\t"+prefix);
-//        display_tree_ab(tree->m_right, "\t"+prefix);
-//    }
-//}
+void display_tree_ab(cwt_node *tree, string prefix) {
+    cout << prefix << tree->m_old_a << " , " << tree->m_old_b << "\n";
+    cout << prefix << "P_e: " << exp(tree->m_old_P) << "\n";
+    cout << prefix << "P_w: " << exp(tree->m_new_weighted_P) << "\n";
+
+    if (tree->m_left == 0 & tree->m_right == 0) {
+        return;
+    } else {
+        if (tree->m_left != 0) display_tree_ab(tree->m_left, "\t"+prefix);
+        if (tree->m_right != 0) display_tree_ab(tree->m_right, "\t"+prefix);
+    }
+}
 
 int main() {
     uint8 h1[] = {0, 1, 0};
@@ -44,6 +44,7 @@ int main() {
 
     for (int i=0; i<7; i++) {
         tree->update_and_logprob(hh[i], bit[i]);
+//        tree->logprob(hh[i], bit[i]);
         logprob = tree->logprob_block();
         std::cout << exp(logprob) << "\n";
     }
@@ -54,7 +55,7 @@ int main() {
         std::cout << exp(logprob) << "\n";
     }*/
 
-//    display_tree_ab(tree->m_root_node, "");
+    display_tree_ab(tree->m_root_node, "");
 
 
     std::cout << exp(logprob);
