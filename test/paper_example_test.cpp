@@ -13,7 +13,7 @@ using namespace std;
 void display_tree_ab(cwt_node *tree, string prefix) {
     cout << prefix << tree->m_old_a << " , " << tree->m_old_b << "\n";
     cout << prefix << "P_e: " << exp(tree->m_old_P) << "\n";
-    cout << prefix << "P_w: " << exp(tree->m_new_weighted_P) << "\n";
+    cout << prefix << "P_w: " << exp(tree->m_weighted_P) << "\n";
 
     if (tree->m_left == 0 & tree->m_right == 0) {
         return;

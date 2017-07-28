@@ -35,7 +35,7 @@ int main() {
 //        for (int i=0; i< w*h; i++) {
 //            image[i] = (uint8) (rand() % 2);
 //        }
-        cout << image_pseudocount << "\n";
+        cout << x << ": " << image_pseudocount << "\n";
     }
     gettimeofday(&tp, NULL);
     long int ms2 = tp.tv_sec * 1000 + tp.tv_usec / 1000;

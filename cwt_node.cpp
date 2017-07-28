@@ -13,16 +13,16 @@ static const bool UseFastJacobianLog = true;
 
 cwt_node::cwt_node(cwt_node *left, cwt_node *right, int depth, int max_depth) {
     m_old_a = 0;
-    m_new_a = 0;
+    m_a = 0;
 
     m_old_b = 0;
-    m_new_b = 0;
+    m_b = 0;
 
     m_old_P = 0;
-    m_new_P = 0;
+    m_P = 0;
 
     m_old_weighted_P = 0;
-    m_new_weighted_P = 0;
+    m_weighted_P = 0;
 
     m_left = left;
     m_right = right;
@@ -33,16 +33,16 @@ cwt_node::cwt_node(cwt_node *left, cwt_node *right, int depth, int max_depth) {
 
 double cwt_node::update(uint8 *context, uint8 bit, cwt_node **updated_nodes) {
 
-    m_old_a = m_new_a;
-    m_old_b = m_new_b;
-    m_old_P = m_new_P;
-    m_old_weighted_P = m_new_weighted_P;
+    m_old_a = m_a;
+    m_old_b = m_b;
+    m_old_P = m_P;
+    m_old_weighted_P = m_weighted_P;
 
     updated_nodes[m_depth] = this;
     double result;
 
-    if (bit == 1) m_new_b = m_new_b + 1;
-    else m_new_a = m_new_a + 1;
+    if (bit == 1) m_b = m_b + 1;
+    else m_a = m_a + 1;
 
     if (m_depth == m_max_depth) {
         result = update_P((bit == 0));
@@ -66,10 +66,10 @@ double cwt_node::update(uint8 *context, uint8 bit, cwt_node **updated_nodes) {
 }
 
 void cwt_node::reset() {
-    m_new_a = m_old_a;
-    m_new_b = m_old_b;
-    m_new_P = m_old_P;
-    m_new_weighted_P = m_old_weighted_P;
+    m_a = m_old_a;
+    m_b = m_old_b;
+    m_P = m_old_P;
+    m_weighted_P = m_old_weighted_P;
 }
 
 inline double ctsLogAdd(double log_x, double log_y) {
@@ -97,20 +97,20 @@ cwt_node::~cwt_node() {
 
 double cwt_node::update_P(bool a_updated) {
     if (a_updated) {
-        int a = m_new_a - 1, b = m_new_b;
-        m_new_P = fast_log((a + 0.5) / (a + b + 1)) + m_new_P;
+        int a = m_a - 1, b = m_b;
+        m_P = fast_log((a + 0.5) / (a + b + 1)) + m_P;
     } else {
-        int a = m_new_a, b = m_new_b - 1;
-        m_new_P = fast_log((b + 0.5) / (a + b + 1)) + m_new_P;
+        int a = m_a, b = m_b - 1;
+        m_P = fast_log((b + 0.5) / (a + b + 1)) + m_P;
     }
     if ((m_left == 0 && m_right == 0)) {
-        m_new_weighted_P = m_new_P;
+        m_weighted_P = m_P;
     } else {
-        double term1 = LOG_PT_5 + m_new_P;
-        double weighted_p_left = (m_left == 0) ? 0 : m_left->m_new_weighted_P;
-        double weighted_p_right = (m_right == 0) ? 0 : m_right->m_new_weighted_P;
+        double term1 = LOG_PT_5 + m_P;
+        double weighted_p_left = (m_left == 0) ? 0 : m_left->m_weighted_P;
+        double weighted_p_right = (m_right == 0) ? 0 : m_right->m_weighted_P;
         double term2 = LOG_PT_5 + weighted_p_left + weighted_p_right;
-        m_new_weighted_P = ctsLogAdd(term1, term2);
+        m_weighted_P = ctsLogAdd(term1, term2);
     }
-    return m_new_weighted_P;
+    return m_weighted_P;
 }

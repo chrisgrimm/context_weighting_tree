@@ -14,8 +14,8 @@ public:
     void reset();
     cwt_node* m_left = 0;
     cwt_node* m_right = 0;
-    int m_old_a, m_new_a, m_old_b, m_new_b;
-    double m_old_P, m_new_P, m_old_weighted_P, m_new_weighted_P;
+    int m_a, m_old_a, m_b, m_old_b;
+    double m_P, m_old_P, m_weighted_P, m_old_weighted_P;
     int m_depth;
     int m_max_depth;
 };

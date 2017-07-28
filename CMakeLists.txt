@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.2)
 project(context_weighting_tree)
 
-set(CMAKE_CXX_FLAGS "-O3 ${CMAKE_CXX_FLAGS} -std=c++11 -O3")
+set(CMAKE_CXX_FLAGS "-O3 ${CMAKE_CXX_FLAGS} -std=c++11 -O3 -pthread")
 
 set(SOURCE_FILES
         cwt.cpp

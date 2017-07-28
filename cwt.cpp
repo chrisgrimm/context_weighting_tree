@@ -45,5 +45,5 @@ double cwt::update_and_logprob(uint8 *context, uint8 bit) {
 }
 
 double cwt::logprob_block() {
-    return m_root_node->m_new_weighted_P;
+    return m_root_node->m_weighted_P;
 }
