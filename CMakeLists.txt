@@ -20,7 +20,7 @@ set(SOURCE_FILES
         PowFast.hpp
         PowFast.cpp)
 
-add_executable(construct_destruct_test ${SOURCE_FILES} test/construct_destruct_test.cpp python_api.cpp location_dependent_cwt.cpp location_dependent_cwt.h)
+add_executable(construct_destruct_test ${SOURCE_FILES} test/construct_destruct_test.cpp python_api.cpp location_dependent_cwt.cpp location_dependent_cwt.h cts.cpp cts.h cts_node.cpp cts_node.h)
 
 add_executable(paper_example_test ${SOURCE_FILES} test/paper_example_test.cpp)
 
