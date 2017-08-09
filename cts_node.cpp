@@ -8,11 +8,11 @@
 #include <cmath>
 #include <iostream>
 #include "fastmath.hpp"
+#include "common.h"
 
-static const bool UseFastJacobianLog = true;
-#define LOG_PT_5 -0.6931471805599453094172321 // log(0.5)
+#define LOG_PT_5 (-0.6931471805599453094172321) // log(0.5)
 
-cts_node::cts_node(cts_node *left, cts_node *right, int depth, int max_depth) {
+cts_node::cts_node(int depth, int max_depth) {
     m_old_a = 0;
     m_a = 0;
 
@@ -30,12 +30,14 @@ cts_node::cts_node(cts_node *left, cts_node *right, int depth, int max_depth) {
     m_old_sc = LOG_PT_5;
     m_old_kc = LOG_PT_5;
 
-    m_left = left;
-    m_right = right;
+    m_left = 0;
+    m_right = 0;
 
     m_depth = depth;
     m_max_depth = max_depth;
 }
+
+cts_node::~cts_node() {}
 
 double cts_node::update(uint8 *context, uint8 bit, cts_node **updated_nodes) {
 
@@ -54,13 +56,13 @@ double cts_node::update(uint8 *context, uint8 bit, cts_node **updated_nodes) {
         result = update_P((bit == 0));
     } else if (*context == 1) {
         if (m_left == 0) {
-            m_left = new cts_node(0, 0, m_depth+1, m_max_depth);
+            m_left = new cts_node(m_depth+1, m_max_depth);
         }
         m_left->update(context+1, bit, updated_nodes);
         result = update_P((bit == 0));
     } else {
         if (m_right == 0) {
-            m_right = new cts_node(0, 0, m_depth+1, m_max_depth);
+            m_right = new cts_node(m_depth+1, m_max_depth);
         }
         m_right->update(context+1, bit, updated_nodes);
         result = update_P((bit == 0));
@@ -75,29 +77,6 @@ void cts_node::reset() {
     m_b = m_old_b;
     m_P = m_old_P;
     m_weighted_P = m_old_weighted_P;
-}
-
-inline double ctsLogAdd(double log_x, double log_y) {
-
-    if (UseFastJacobianLog) {
-
-        if (log_x < log_y) {
-            return fast_jacoblog(log_y - log_x) + log_x;
-        } else {
-            return fast_jacoblog(log_x - log_y) + log_y;
-        }
-
-    } else {
-        if (log_x < log_y) {
-            return std::log(1.0 + std::exp(log_y - log_x)) + log_x;
-        } else {
-            return std::log(1.0 + std::exp(log_x - log_y)) + log_y;
-        }
-    }
-}
-
-cts_node::~cts_node() {
-
 }
 
 double cts_node::update_P(bool a_updated) {

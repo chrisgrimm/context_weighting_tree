@@ -4,6 +4,7 @@
 
 #include <tiff.h>
 #include "location_dependent_cwt.h"
+#include "cts.h"
 
 #include <cmath>
 #include <tuple>
@@ -12,8 +13,8 @@
 
 using namespace std;
 
-static const bool UseThreads = false;
-static const bool NumThreads = 2;
+#define UseThreads false
+#define NumThreads 2
 
 
 uint8 get_pixel(uint8 *image, int x, int y, int w, int h) {
@@ -24,7 +25,7 @@ uint8 get_pixel(uint8 *image, int x, int y, int w, int h) {
     }
 }
 
-tuple<double, double> feed_bits_to_tree(cwt *tree, uint8 inp_pixel, int inp_bit_num, int num_bits, uint8 *context, int len_context) {
+tuple<double, double> feed_bits_to_tree(context_tree *tree, uint8 inp_pixel, int inp_bit_num, int num_bits, uint8 *context, int len_context) {
     // build flat context array.
     uint8 context_flat[len_context*num_bits];
     int context_flat_pos = 0;
@@ -42,14 +43,19 @@ tuple<double, double> feed_bits_to_tree(cwt *tree, uint8 inp_pixel, int inp_bit_
 }
 
 
-cwt ****build_cwt_array(int w, int h, int num_bits) {
-    cwt ****cwt_array = new cwt***[w];
+context_tree ****build_cwt_array(int w, int h, int num_bits, bool switching) {
+    context_tree ****cwt_array = new context_tree***[w];
+    int context_depth = 4*num_bits;
     for (int x=0; x<w; x++) {
-        cwt_array[x] = new cwt**[h];
+        cwt_array[x] = new context_tree**[h];
         for (int y=0; y<h; y++) {
-            cwt_array[x][y] = new cwt*[num_bits];
+            cwt_array[x][y] = new context_tree*[num_bits];
             for (int c=0; c<num_bits; c++) {
-                cwt_array[x][y][c] = new cwt(4*num_bits);
+                if (switching) {
+                    cwt_array[x][y][c] = new cts(context_depth);
+                } else {
+                    cwt_array[x][y][c] = new cwt(context_depth);
+                }
             }
         }
     }
@@ -57,7 +63,7 @@ cwt ****build_cwt_array(int w, int h, int num_bits) {
 }
 
 
-void destroy_cwt_array(cwt ****cwt_array, int w, int h, int num_bits) {
+void destroy_cwt_array(context_tree ****cwt_array, int w, int h, int num_bits) {
     for (int x=0; x<w; x++) {
         for (int y=0; y<h; y++) {
             for (int c=0; c<num_bits; c++) {
@@ -71,64 +77,14 @@ void destroy_cwt_array(cwt ****cwt_array, int w, int h, int num_bits) {
 }
 
 
-
-location_dependent_cwt::location_dependent_cwt(int w, int h, int num_bits) {
-    m_cwt_array = build_cwt_array(w, h, num_bits);
-    m_width = w;
-    m_height = h;
-    m_num_bits = num_bits;
-}
-location_dependent_cwt::~location_dependent_cwt() {
-    destroy_cwt_array(m_cwt_array, m_width, m_height, m_num_bits);
-}
-
-double location_dependent_cwt::process_image(uint8 *image) {
-    int w = m_width, h = m_height, num_bits = m_num_bits;
-
-    double cum_prob = 0.0;
-    double cum_recoding_prob = 0.0;
-    if (UseThreads) {
-        std::tuple<double, double> ret[NumThreads];
-        std::thread threads[NumThreads];
-        int cols_per_thread = w/NumThreads;
-
-        for (int i=0; i < NumThreads; ++i) {
-            int from_x = i * cols_per_thread;
-            int to_x = std::max(from_x + cols_per_thread, w);
-            threads[i] = std::thread(&process_image_cols,
-                                     m_cwt_array, image, ret + i, from_x, to_x, w, h, num_bits);
-        }
-        for (int i=0; i < NumThreads; ++i) {
-            threads[i].join();
-            tuple<double, double> result = ret[i];
-            cum_prob += std::get<0>(result);
-            cum_recoding_prob += std::get<1>(result);
-        }
-    } else {
-        tuple<double, double> result;
-        process_image_cols(m_cwt_array, image, &result, 0, w, w, m_height, m_num_bits);
-        cum_prob += std::get<0>(result);
-        cum_recoding_prob += std::get<1>(result);
-    }
-
-    cum_prob = exp(cum_prob);
-    cum_recoding_prob = exp(cum_recoding_prob);
-    if (cum_prob >= cum_recoding_prob) {
-        return 0;
-    } else {
-        double pseudocount = cum_prob*(1 - cum_recoding_prob)/(cum_recoding_prob - cum_prob);
-        return pseudocount;
-    }
-}
-
-void process_image_cols(cwt ****cwt_array, uint8 *image, tuple<double, double>* result, int from_x, int to_x, int w, int h, int num_bits) {
+void process_image_cols(context_tree ****cwt_array, uint8 *image, tuple<double, double>* result, int from_x, int to_x, int w, int h, int num_bits) {
     double cum_prob = 0.0;
     double cum_recoding_prob = 0.0;
 
     for (int x=from_x; x < to_x; x++) {
         for (int y = 0; y < h; y++) {
             for (int c = 0; c < num_bits; c++) {
-                cwt *tree = cwt_array[x][y][c];
+                context_tree *tree = cwt_array[x][y][c];
                 uint8 pixel_value = get_pixel(image, x, y, w, h);
                 uint8 context[4];
                 context[0] = get_pixel(image, x - 1, y, w, h);
@@ -144,4 +100,55 @@ void process_image_cols(cwt ****cwt_array, uint8 *image, tuple<double, double>* 
         }
     }
     *result = make_tuple(cum_prob, cum_recoding_prob);
+}
+
+
+location_dependent_cwt::location_dependent_cwt(int w, int h, int num_bits, bool switching) {
+    m_cwt_array = build_cwt_array(w, h, num_bits, switching);
+    m_width = w;
+    m_height = h;
+    m_num_bits = num_bits;
+}
+location_dependent_cwt::~location_dependent_cwt() {
+    destroy_cwt_array(m_cwt_array, m_width, m_height, m_num_bits);
+}
+
+double location_dependent_cwt::process_image(uint8 *image) {
+    int w = m_width, h = m_height, num_bits = m_num_bits;
+
+    double cum_prob = 0.0;
+    double cum_recoding_prob = 0.0;
+
+#if UseThreads
+    std::tuple<double, double> ret[NumThreads];
+    std::thread threads[NumThreads];
+    int cols_per_thread = w/NumThreads;
+
+    for (int i=0; i < NumThreads; ++i) {
+        int from_x = i * cols_per_thread;
+        int to_x = std::max(from_x + cols_per_thread, w);
+        threads[i] = std::thread(&process_image_cols,
+                                 m_cwt_array, image, ret + i, from_x, to_x, w, h, num_bits);
+    }
+    for (int i=0; i < NumThreads; ++i) {
+        threads[i].join();
+        tuple<double, double> result = ret[i];
+        cum_prob += std::get<0>(result);
+        cum_recoding_prob += std::get<1>(result);
+    }
+#else
+    tuple<double, double> result;
+    process_image_cols(m_cwt_array, image, &result, 0, w, w, m_height, m_num_bits);
+    cum_prob += std::get<0>(result);
+    cum_recoding_prob += std::get<1>(result);
+#endif
+
+    cum_prob = exp(cum_prob);
+    cum_recoding_prob = exp(cum_recoding_prob);
+    if (cum_prob >= cum_recoding_prob) {
+        return 0;
+    } else {
+        double pseudocount = cum_prob*(1 - cum_recoding_prob)/(cum_recoding_prob - cum_prob);
+        return pseudocount;
+    }
 }

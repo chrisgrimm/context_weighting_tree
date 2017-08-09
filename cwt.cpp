@@ -17,7 +17,7 @@ void kill_tree_recursive(cwt_node *ptr) {
 
 cwt::cwt(int context_depth) {
     m_context_depth = context_depth;
-    m_root_node = new cwt_node(0, 0, 0, context_depth);
+    m_root_node = new cwt_node(0, context_depth);
 }
 
 cwt::~cwt() {

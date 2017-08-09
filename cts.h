@@ -9,14 +9,17 @@
 #include <tiff.h>
 #include "cwt_node.h"
 #include "cts_node.h"
+#include "context_tree.h"
 
-class cts {
+class cts : public context_tree {
 public:
     cts(int context_depth);
-    ~cts();
-    double update_and_logprob(uint8 *context, uint8 bit);
-    double logprob(uint8 *context, uint8 bit);
-    double logprob_block();
+    ~cts() override ;
+    double update_and_logprob(uint8 *context, uint8 bit) override ;
+    double logprob(uint8 *context, uint8 bit) override ;
+    double logprob_block() override ;
+
+private:
     cts_node *m_root_node;
     int m_context_depth;
 };

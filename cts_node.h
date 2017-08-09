@@ -12,7 +12,7 @@
 
 class cts_node {
 public:
-    cts_node(cts_node *left, cts_node *right, int depth, int max_depth);
+    cts_node(int depth, int max_depth);
     ~cts_node();
     double update_P(bool a_updated);
     double update(uint8 *context, uint8 bit, cts_node **updated_nodes);

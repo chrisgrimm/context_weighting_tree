@@ -15,11 +15,11 @@ void process_image_cols(cwt ****cwt_array, uint8 *image, tuple<double, double>* 
 
 class location_dependent_cwt {
 public:
-    location_dependent_cwt(int w, int h, int num_bits);
+    location_dependent_cwt(int w, int h, int num_bits, bool switching);
     ~location_dependent_cwt();
     double process_image(uint8 *image);
 private:
-    cwt ****m_cwt_array;
+    context_tree ****m_cwt_array;
     int m_width, m_height, m_num_bits;
 };
 

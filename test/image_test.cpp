@@ -19,10 +19,11 @@ int main() {
 
     /* generate secret number between 1 and 10: */
     cout << "hi!" << "\n";
+    bool switching = true;
     int w = 42;
     int h = 42;
     int num_bits = 3;
-    auto ldc = location_dependent_cwt(w, h, num_bits);
+    auto ldc = location_dependent_cwt(w, h, num_bits, switching);
     uint8 image[w*h];
     for (int i=0; i< w*h; i++) {
         image[i] = (uint8) (rand() % 2);

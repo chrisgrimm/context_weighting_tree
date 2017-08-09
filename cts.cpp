@@ -3,8 +3,6 @@
 //
 
 #include "cts.h"
-#include "cts_node.h"
-
 
 void kill_tree_recursive(cts_node *ptr) {
     if (ptr->m_left != 0)
@@ -12,12 +10,11 @@ void kill_tree_recursive(cts_node *ptr) {
     if (ptr->m_right != 0)
         kill_tree_recursive(ptr->m_right);
     delete ptr;
-
 }
 
 cts::cts(int context_depth) {
     m_context_depth = context_depth;
-    m_root_node = new cts_node(0, 0, 0, context_depth);
+    m_root_node = new cts_node(0, context_depth);
 }
 
 cts::~cts() {
@@ -26,7 +23,7 @@ cts::~cts() {
 
 double cts::logprob(uint8 *context, uint8 bit) {
     double before = logprob_block();
-    cwt_node *updated_nodes[m_context_depth];
+    cts_node *updated_nodes[m_context_depth];
     double after = m_root_node->update(context, bit, updated_nodes);
 
     for (int i = 0; i < m_context_depth; ++i) {
@@ -38,7 +35,7 @@ double cts::logprob(uint8 *context, uint8 bit) {
 
 double cts::update_and_logprob(uint8 *context, uint8 bit) {
     double before = logprob_block();
-    cwt_node *updated_nodes[m_context_depth];
+    cts_node *updated_nodes[m_context_depth];
     double after = m_root_node->update(context, bit, updated_nodes);
 
     return after - before;

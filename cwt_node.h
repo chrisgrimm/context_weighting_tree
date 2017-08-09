@@ -7,10 +7,10 @@
 
 class cwt_node {
 public:
-    cwt_node(cwt_node *left, cwt_node *right, int depth, int max_depth);
+    cwt_node(int depth, int max_depth);
     ~cwt_node();
-    double update_P(bool a_updated);
     double update(uint8 *context, uint8 bit, cwt_node **updated_nodes);
+    double update_P(bool a_updated);
     void reset();
     cwt_node* m_left = 0;
     cwt_node* m_right = 0;

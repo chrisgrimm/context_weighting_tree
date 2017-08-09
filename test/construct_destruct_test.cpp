@@ -6,6 +6,9 @@
 #include <iostream>
 #include "time.h"
 #include "../cwt.h"
+#include "../cts.h"
+
+#define SWITCHING true
 
 int main() {
 
@@ -16,7 +19,11 @@ int main() {
     int context_depth = 10;
     uint8 context[context_depth];
 
-    cwt *tree = new cwt(context_depth);
+#if SWITCHING
+    context_tree *tree = new cts(context_depth);
+#else
+    context_tree *tree = new cwt(context_depth);
+#endif
 
     for (int i = 0; i < num_adds; ++i) {
         for (int j = 0; j < context_depth; ++j) {
@@ -27,7 +34,7 @@ int main() {
         tree->update_and_logprob(context, uint8(rand() % 2));
     }
 
-    tree->~cwt();
+    delete tree;
 
     return 0;
 }
