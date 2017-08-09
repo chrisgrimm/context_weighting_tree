@@ -12,7 +12,7 @@
 static const bool UseFastJacobianLog = true;
 #define LOG_PT_5 -0.6931471805599453094172321 // log(0.5)
 
-cts_node::cts_node(cts_node *left, cts_node *right, int depth, int max_depth) {
+cts_node::cts_node(cts *tree, cts_node *left, cts_node *right, int depth, int max_depth) {
     m_old_a = 0;
     m_a = 0;
 
@@ -21,6 +21,8 @@ cts_node::cts_node(cts_node *left, cts_node *right, int depth, int max_depth) {
 
     m_old_P = 0;
     m_P = 0;
+
+    m_tree = tree;
 
     m_old_weighted_P = 0;
     m_weighted_P = 0;
@@ -119,7 +121,7 @@ double cts_node::update_P(bool a_updated) {
 
         double z = (weighted_p_left - old_weighted_p_left) + (weighted_p_right - old_weighted_p_right);
         double term2 = m_sc + z;
-        double alpha = 1.0; // TODO set alpha
+        double alpha = 1.0 / m_tree->m_alpha;
         m_kc = ctsLogAdd(log(alpha) + m_old_weighted_P, log(1 - 2*alpha) + term1);
         m_sc = ctsLogAdd(log(alpha) + m_old_weighted_P, log(1 - 2*alpha) + term2);
         m_weighted_P = ctsLogAdd(term1, term2);

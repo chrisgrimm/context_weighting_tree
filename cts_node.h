@@ -9,16 +9,18 @@
 #include <tiff.h>
 #include <stdlib.h>
 #include <tuple>
+#include "cts.h"
 
 class cts_node {
 public:
-    cts_node(cts_node *left, cts_node *right, int depth, int max_depth);
+    cts_node(cts *tree, cts_node *left, cts_node *right, int depth, int max_depth);
     ~cts_node();
     double update_P(bool a_updated);
     double update(uint8 *context, uint8 bit, cts_node **updated_nodes);
     void reset();
     cts_node* m_left = 0;
     cts_node* m_right = 0;
+    cts* m_tree;
     int m_a, m_old_a, m_b, m_old_b;
     double m_P, m_old_P, m_weighted_P, m_old_weighted_P;
     double m_kc, m_sc;

@@ -14,6 +14,7 @@ class cts {
 public:
     cts(int context_depth);
     ~cts();
+    long m_alpha = 1;
     double update_and_logprob(uint8 *context, uint8 bit);
     double logprob(uint8 *context, uint8 bit);
     double logprob_block();
