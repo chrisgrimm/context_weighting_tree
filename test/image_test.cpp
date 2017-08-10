@@ -31,7 +31,7 @@ int main() {
     struct timeval tp;
     gettimeofday(&tp, NULL);
     long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
-    for (int x=0; x<1000; x++) {
+    for (int x=0; x<100; x++) {
         double image_pseudocount = ldc.process_image(image);
 //        for (int i=0; i< w*h; i++) {
 //            image[i] = (uint8) (rand() % 2);

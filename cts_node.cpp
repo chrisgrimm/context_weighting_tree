@@ -94,24 +94,24 @@ double cts_node::update_P(bool a_updated) {
     if ((m_left == 0 && m_right == 0)) {
         m_weighted_P = m_P;
     } else {
-        double term1 = m_kc + (m_P - m_old_P);
         double weighted_p_left = (m_left == 0) ? 0 : m_left->m_weighted_P;
         double weighted_p_right = (m_right == 0) ? 0 : m_right->m_weighted_P;
         double old_weighted_p_left = (m_left == 0) ? 0 : m_left->m_old_weighted_P;
         double old_weighted_p_right = (m_right == 0) ? 0 : m_right->m_old_weighted_P;
 
         double z = (weighted_p_left - old_weighted_p_left) + (weighted_p_right - old_weighted_p_right);
-        double term2 = m_sc + z;
         double alpha = *m_alpha;
-        if (alpha >= 1/2) {
-            m_kc = log(alpha) + m_old_weighted_P;
-            m_sc = log(alpha) + m_old_weighted_P;
-        } else {
-            m_kc = ctsLogAdd(log(alpha) + m_old_weighted_P, log(1 - 2*alpha) + term1);
-            m_sc = ctsLogAdd(log(alpha) + m_old_weighted_P, log(1 - 2*alpha) + term2);
-        }
 
+        double term1 = m_kc + (m_P - m_old_P);
+        double term2 = m_sc + z;
         m_weighted_P = ctsLogAdd(term1, term2);
+        if (alpha >= 1/2) {
+            m_kc = log(alpha) + m_weighted_P;
+            m_sc = log(alpha) + m_weighted_P;
+        } else {
+            m_kc = ctsLogAdd(log(alpha) + m_weighted_P, log(1 - 2*alpha) + term1);
+            m_sc = ctsLogAdd(log(alpha) + m_weighted_P, log(1 - 2*alpha) + term2);
+        }
 
     }
     return m_weighted_P;
