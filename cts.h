@@ -7,7 +7,6 @@
 
 
 #include <tiff.h>
-#include "cwt_node.h"
 #include "cts_node.h"
 #include "context_tree.h"
 
@@ -20,6 +19,8 @@ public:
     double logprob_block() override ;
 
 private:
+    long m_n;
+    double m_alpha;
     cts_node *m_root_node;
     int m_context_depth;
 };

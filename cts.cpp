@@ -2,6 +2,7 @@
 // Created by Christopher Grimm on 8/7/17.
 //
 
+#include <cmath>
 #include "cts.h"
 
 void kill_tree_recursive(cts_node *ptr) {
@@ -14,7 +15,9 @@ void kill_tree_recursive(cts_node *ptr) {
 
 cts::cts(int context_depth) {
     m_context_depth = context_depth;
-    m_root_node = new cts_node(0, context_depth);
+    m_root_node = new cts_node(&m_alpha, 0, context_depth);
+    m_n = 1;
+    m_alpha = 1.0 / (m_n + 1.0);
 }
 
 cts::~cts() {
@@ -38,6 +41,8 @@ double cts::update_and_logprob(uint8 *context, uint8 bit) {
     cts_node *updated_nodes[m_context_depth];
     double after = m_root_node->update(context, bit, updated_nodes);
 
+    m_n += 1;
+    m_alpha = 1.0 / (m_n + 1.0);
     return after - before;
 }
 

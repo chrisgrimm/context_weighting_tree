@@ -12,7 +12,7 @@
 
 #define LOG_PT_5 (-0.6931471805599453094172321) // log(0.5)
 
-cts_node::cts_node(int depth, int max_depth) {
+cts_node::cts_node(double *alpha, int depth, int max_depth) {
     m_old_a = 0;
     m_a = 0;
 
@@ -21,6 +21,8 @@ cts_node::cts_node(int depth, int max_depth) {
 
     m_old_P = 0;
     m_P = 0;
+
+    m_alpha = alpha;
 
     m_old_weighted_P = 0;
     m_weighted_P = 0;
@@ -56,13 +58,13 @@ double cts_node::update(uint8 *context, uint8 bit, cts_node **updated_nodes) {
         result = update_P((bit == 0));
     } else if (*context == 1) {
         if (m_left == 0) {
-            m_left = new cts_node(m_depth+1, m_max_depth);
+            m_left = new cts_node(m_alpha, m_depth+1, m_max_depth);
         }
         m_left->update(context+1, bit, updated_nodes);
         result = update_P((bit == 0));
     } else {
         if (m_right == 0) {
-            m_right = new cts_node(m_depth+1, m_max_depth);
+            m_right = new cts_node(m_alpha, m_depth+1, m_max_depth);
         }
         m_right->update(context+1, bit, updated_nodes);
         result = update_P((bit == 0));
@@ -77,6 +79,8 @@ void cts_node::reset() {
     m_b = m_old_b;
     m_P = m_old_P;
     m_weighted_P = m_old_weighted_P;
+    m_sc = m_old_sc;
+    m_kc = m_old_kc;
 }
 
 double cts_node::update_P(bool a_updated) {
@@ -98,9 +102,15 @@ double cts_node::update_P(bool a_updated) {
 
         double z = (weighted_p_left - old_weighted_p_left) + (weighted_p_right - old_weighted_p_right);
         double term2 = m_sc + z;
-        double alpha = 1.0; // TODO set alpha
-        m_kc = ctsLogAdd(log(alpha) + m_old_weighted_P, log(1 - 2*alpha) + term1);
-        m_sc = ctsLogAdd(log(alpha) + m_old_weighted_P, log(1 - 2*alpha) + term2);
+        double alpha = *m_alpha;
+        if (alpha >= 1/2) {
+            m_kc = log(alpha) + m_old_weighted_P;
+            m_sc = log(alpha) + m_old_weighted_P;
+        } else {
+            m_kc = ctsLogAdd(log(alpha) + m_old_weighted_P, log(1 - 2*alpha) + term1);
+            m_sc = ctsLogAdd(log(alpha) + m_old_weighted_P, log(1 - 2*alpha) + term2);
+        }
+
         m_weighted_P = ctsLogAdd(term1, term2);
 
     }

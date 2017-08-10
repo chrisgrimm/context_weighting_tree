@@ -7,12 +7,11 @@
 
 
 #include <tiff.h>
-#include <stdlib.h>
 #include <tuple>
 
 class cts_node {
 public:
-    cts_node(int depth, int max_depth);
+    cts_node(double *alpha, int depth, int max_depth);
     ~cts_node();
     double update_P(bool a_updated);
     double update(uint8 *context, uint8 bit, cts_node **updated_nodes);
@@ -20,6 +19,7 @@ public:
     cts_node* m_left = 0;
     cts_node* m_right = 0;
     int m_a, m_old_a, m_b, m_old_b;
+    double *m_alpha;
     double m_P, m_old_P, m_weighted_P, m_old_weighted_P;
     double m_kc, m_sc;
     int m_depth;
