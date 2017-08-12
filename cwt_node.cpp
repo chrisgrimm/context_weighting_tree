@@ -89,7 +89,7 @@ double cwt_node::update_P(bool a_updated) {
         double weighted_p_left = (m_left == 0) ? 0 : m_left->m_weighted_P;
         double weighted_p_right = (m_right == 0) ? 0 : m_right->m_weighted_P;
         double term2 = LOG_PT_5 + weighted_p_left + weighted_p_right;
-        m_weighted_P = ctsLogAdd(term1, term2);
+        m_weighted_P = log_add(term1, term2);
     }
     return m_weighted_P;
 }

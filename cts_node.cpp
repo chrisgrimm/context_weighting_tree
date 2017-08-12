@@ -104,13 +104,13 @@ double cts_node::update_P(bool a_updated) {
 
         double term1 = m_kc + (m_P - m_old_P);
         double term2 = m_sc + z;
-        m_weighted_P = ctsLogAdd(term1, term2);
+        m_weighted_P = log_add(term1, term2);
         if (alpha >= 1/2) {
             m_kc = log(alpha) + m_weighted_P;
             m_sc = log(alpha) + m_weighted_P;
         } else {
-            m_kc = ctsLogAdd(log(alpha) + m_weighted_P, log(1 - 2*alpha) + term1);
-            m_sc = ctsLogAdd(log(alpha) + m_weighted_P, log(1 - 2*alpha) + term2);
+            m_kc = log_add(log(alpha) + m_weighted_P, log(1 - 2 * alpha) + term1);
+            m_sc = log_add(log(alpha) + m_weighted_P, log(1 - 2 * alpha) + term2);
         }
 
     }

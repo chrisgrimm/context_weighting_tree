@@ -7,7 +7,7 @@
 
 #define UseFastJacobianLog false
 
-inline double ctsLogAdd(double log_x, double log_y) {
+inline double log_add(double log_x, double log_y) {
 #if UseFastJacobianLog
     if (log_x < log_y) {
         return fast_jacoblog(log_y - log_x) + log_x;

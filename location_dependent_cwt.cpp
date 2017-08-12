@@ -11,8 +11,6 @@
 #include <thread>
 #include <future>
 
-using namespace std;
-
 #define UseThreads false
 #define NumThreads 2
 
