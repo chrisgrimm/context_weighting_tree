@@ -22,8 +22,11 @@ public:
 private:
     cwt_node_symbol *m_root_node;
     int m_context_depth;
+    int m_alphabet_size;
 
     int m_n;
+
+    void check_input(uint8 *context, uint8 symbol);
 };
 
 

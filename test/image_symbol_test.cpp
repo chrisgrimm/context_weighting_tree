@@ -20,7 +20,7 @@ int main() {
     cout << "hi!" << "\n";
     int w = 42;
     int h = 42;
-    int alphabet_size = 5;
+    int alphabet_size = 8;
     auto ldc = location_dependent_cwt_symbol(w, h, alphabet_size);
     uint8 image[w*h];
     for (int i=0; i< w*h; i++) {
@@ -32,7 +32,7 @@ int main() {
     for (int x=0; x<1000; x++) {
         double image_pseudocount = ldc.process_image(image);
 //        for (int i=0; i< w*h; i++) {
-//            image[i] = (uint8) (rand() % 2);
+//            image[i] = (uint8) (rand() % alphabet_size);
 //        }
         cout << x << ": " << image_pseudocount << "\n";
     }

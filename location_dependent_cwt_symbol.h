@@ -16,7 +16,6 @@ public:
     location_dependent_cwt_symbol(int w, int h, int alphabet_size);
     ~location_dependent_cwt_symbol();
     double process_image(uint8 *image);
-    int alphabet_size;
 
     uint8 get_pixel(uint8 *image, int x, int y, int w, int h);
     tuple<double, double> feed_bits_to_tree(cwt_symbol *tree, uint8 inp_pixel, uint8 *context);
